@@ -3,6 +3,7 @@ package com.tomhurry.analyze;
 import cn.hutool.core.io.FileUtil;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * 日志扫描器
@@ -14,7 +15,7 @@ import java.io.*;
 public class LogScanner {
 
 
-    public LogView scan(String filePath) throws IOException {
+    public LogView scan(String filePath) {
 
         LogView view = new LogView();
 
@@ -22,13 +23,24 @@ public class LogScanner {
 
             File file = new File(filePath);
             if (file.canRead()) {
-                try (InputStream inputStream = new FileInputStream(file); BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                try (InputStream inputStream = Files.newInputStream(file.toPath()); BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
                     String line;
+                    LogObject logObject = null;
                     while ((line = bufferedReader.readLine()) != null) {
-                        System.out.println(line);
+                        if (LogLineParser.isMatch(line)) {
+                            if (logObject != null) {
+                                view.put(logObject);
+                            }
+                            LogLine logLine = LogLineParser.parse(line);
+                            logObject = new LogObject(logLine);
+                            logObject.put(line);
+                        } else {
+                            if (logObject != null) {
+                                logObject.put(line);
+                            }
+                        }
                     }
-
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -43,9 +55,15 @@ public class LogScanner {
 
     public static void main(String[] args) throws IOException {
 
-        String filePath = "C:\\tmp\\dispatcher.2022-05-21.10.log";
+        String filePath = "C:\\Users\\TaoZhi\\Downloads\\service (1).log";
         LogScanner scanner = new LogScanner();
-        scanner.scan(filePath);
+        LogView logView = scanner.scan(filePath);
+
+        System.out.println(logView.filterByLevel("ERROR"));
+
+        System.out.println(logView.getClassNames());
+
+        System.out.println(logView.getLevels());
 
     }
 }

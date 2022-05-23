@@ -10,13 +10,7 @@ import java.util.regex.Pattern;
  */
 public class LogLineParser {
 
-    // [2022-05-21 13:41:48.211] [grpc-default-executor-190] [] INFO  c.e.c.s.r.r.h.openstack.OpenStackBackupJobHandler jobId_1c64209a3e4b4eda9bf9eaae8b741d2e 接收备份任务返回信息，开始处理
-    private static final String DEFAULT_PATTERN_EXPRESSION = "\\[([^\\[\\]]*)\\]" +
-            " \\[([^\\[\\]]*)\\]" +
-            " \\[([^\\[\\]]*)\\]" +
-            " ([^\\[\\]]*)" +
-            "  ([^\\[\\]]*)" +
-            "  ([^\\[\\]]*)";
+    private static final String DEFAULT_PATTERN_EXPRESSION = "\\[([^\\[\\]]*)\\]\\u0020\\[([^\\[\\]]*)\\]\\u0020\\[([^\\[\\]]*)\\]\\u0020([^\\[\\]]*)\\s([^\\[\\]]*)";
 
     private static Pattern pattern;
 
@@ -29,8 +23,8 @@ public class LogLineParser {
     }
 
     public static LogLine parse(String line, Pattern pattern) {
-        Matcher matcher = pattern.matcher(line);
-        if (matcher.matches()) {
+        Matcher matcher = pattern.matcher(format(line));
+        if (matcher.find()) {
             LogLine logLine = new LogLine();
             logLine.setTime(matcher.group(1));
             logLine.setThread(matcher.group(2));
@@ -44,18 +38,27 @@ public class LogLineParser {
     }
 
     public static boolean isMatch(String line, Pattern pattern) {
-        return pattern.matcher(line).matches();
+        return pattern.matcher(line).find();
     }
 
     public static boolean isMatch(String line) {
         return isMatch(line, pattern);
     }
 
-    public static void main(String[] args) {
-        String str = "[2022-05-21 12:37:00.041] [Thread-7] [] INFO  c.e.c.d.s.s.StorageHeartbeatScheduleJobHandler 【状态检测】刷新控制器1d4befecd05111ecb234000c29fdbf80下所有块存储状态";
+    public static String format(String line) {
+        String[] characters = line.split(" ");
+        String result = "";
+        for (String str : characters) {
+            if (null != str && str.trim().length() > 0) {
+                result = result.concat(str).concat(" ");
+            }
+        }
+        return result;
+    }
 
+    public static void main(String[] args) {
+        String str = "[2022-05-05 17:52:34.074] [main] [] INFO  o.s.c.s.PostProcessorRegistrationDelegate$BeanPostProcessorChecker Bean 'dataSource' of type [com.zaxxer.hikari.HikariDataSource] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)";
         LogLine logLine = LogLineParser.parse(str);
         System.out.println(logLine);
-
     }
 }
