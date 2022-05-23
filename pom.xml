@@ -12,7 +12,7 @@
     <groupId>com.tomhurry</groupId>
     <artifactId>code-base-parent</artifactId>
     <version>1.0.1</version>
-    <name>code-base</name>
+    <name>code-base-java</name>
     <description>code-base-java</description>
     <packaging>pom</packaging>
 

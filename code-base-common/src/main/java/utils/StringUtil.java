@@ -1,11 +1,14 @@
 package utils;
 
+import org.apache.commons.lang.StringUtils;
+
+
 /**
  * 字符串工具类, 继承org.apache.commons.lang3.StringUtils类
  *
  * @author TaoZhi
  */
-public class StringUtil extends org.apache.commons.lang3.StringUtils {
+public class StringUtil {
 
     private static final char SEPARATOR = '_';
     private static final String CHARSET_NAME = "UTF-8";
@@ -21,7 +24,7 @@ public class StringUtil extends org.apache.commons.lang3.StringUtils {
     public static boolean inString(String str, String... strs) {
         if (str != null) {
             for (String s : strs) {
-                if (str.equals(trim(s))) {
+                if (str.equals(StringUtils.trim(s))) {
                     return true;
                 }
             }
